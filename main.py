@@ -1,10 +1,7 @@
-import streamlit as st
-import requests
 import json
 
-# Set up the Streamlit app
-
-
+import requests
+import streamlit as st
 
 
 def main():
@@ -38,23 +35,29 @@ def main():
             message_placeholder = st.empty()
             full_response = ""
             try:
-                llm_response = requests.post(url="http://localhost:8080/completion", 
-                                    stream=True, 
-                                    data=json.dumps({"prompt": full_prompt, "n_predict": 500, "stream": True }),)
+                llm_response = requests.post(
+                    url="http://localhost:8080/completion",
+                    stream=True,
+                    data=json.dumps(
+                        {"prompt": full_prompt, "n_predict": 500, "stream": True}
+                    ),
+                )
 
                 for chunk in llm_response.iter_content(chunk_size=2000):
                     # Display AI message in chat message container
                     print(chunk.decode("utf-8")[6:].strip())
                     if chunk.decode("utf-8")[6:].strip() != "[DONE]":
-                        print('chunk', chunk.decode("utf-8")[6:].strip())
+                        print("chunk", chunk.decode("utf-8")[6:].strip())
                         data = json.loads(chunk.decode("utf-8")[6:].strip())
-                        full_response += (data['content'] or "")
+                        full_response += data["content"] or ""
                         message_placeholder.markdown(full_response + "▌")
                 message_placeholder.markdown(full_response)
             except Exception as e:
                 print(f"An error occurred: {e}. Skipping this line.")
-        st.session_state.messages.append({"role": "assisstant", "content": full_response, "avatar": "assistant"})
-        
+        st.session_state.messages.append(
+            {"role": "assisstant", "content": full_response, "avatar": "assistant"}
+        )
+
 
 if __name__ == "__main__":
     main()
